@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from keras.preprocessing import image
 from keras.callbacks import ModelCheckpoint, EarlyStopping
@@ -12,17 +13,20 @@ import tensorflow as tf
 
 class CatDog:
     def __init__(self):
-        self.train, self.test = image_dataset_from_directory('../.venv/CatDog/dogs-vs-cats/train', image_size=(224, 224),
+        self.train, self.test = image_dataset_from_directory('./.venv/CatDog/train', image_size=(224, 224),
                                                              subset='both', validation_split=0.2, seed=42, batch_size=8, label_mode='binary')
         # # self.pre_check()
         self.model = Sequential()
         self.model_init()
         try:
-            self.model.load_weights('../.venv/CatDog/checkpoint.model.keras')
+            self.model.load_weights('./.venv/CatDog/checkpoint.model.keras')
         except FileNotFoundError:
+            print('Wrong way')
             self.model.fit(self.train, batch_size=8, epochs=50, callbacks=[ModelCheckpoint('CatDog/checkpoint.model.keras', monitor='binary_accuracy', mode='max', save_best_only=True), EarlyStopping(monitor='loss', patience=6)])
         finally:
-            self.model.predict(self.test)
+            loss, accuracy = self.model.evaluate(self.test)
+            print(f'Loss:\t{loss}\nAccuracy:\t{accuracy}')
+
 
     def model_init(self):
         self.model.add(
